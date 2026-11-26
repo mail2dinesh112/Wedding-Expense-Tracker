@@ -76,7 +76,7 @@
   function cleanExpense(data) {
     return {
       date: data.date,
-      name: data.name.trim(),
+      name: data.name.trim().toUpperCase(),
       side: data.side,
       amount: roundAmount(data.amount)
     };

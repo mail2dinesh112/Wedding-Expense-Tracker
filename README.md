@@ -56,7 +56,7 @@ Then visit `http://localhost:8000`.
 
 - `assets/data/expenses.json` holds the wedding information and the initial expense list. It currently contains an **empty** expense list; add expenses in the app and they are saved in LocalStorage.
 - Initial JSON is loaded **only when LocalStorage has no expense data**. Existing records are never overwritten on startup.
-- Dates use ISO format (`YYYY-MM-DD`); amounts are stored as numbers; sides use `groom`, `bride`, or `both`.
+- Dates use ISO format (`YYYY-MM-DD`); amounts are stored as numbers; expense names are stored in uppercase; sides use `groom`, `bride`, or `both`.
 
 ## Design
 

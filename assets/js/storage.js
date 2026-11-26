@@ -122,7 +122,7 @@
     return {
       id: id,
       date: input.date,
-      name: input.name.trim(),
+      name: input.name.trim().toUpperCase(),
       side: input.side,
       amount: amount
     };
