@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wedding Dropdowns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ===== Your project tokens (from style.css) — remove this block if style.css is already loaded ===== */
+  :root{
+    --amber:#FFC46B; --peach:#FA9062; --coral:#F4635E;
+    --accent-deep:#A8463C; --accent:#DF6656; --cocoa:#4A2A23; --muted:#8C6D61;
+    --gradient:linear-gradient(90deg,var(--amber) 0%,var(--peach) 50%,var(--coral) 100%);
+    --background:#FFF8F2; --surface-soft:#FFF1E6; --card:#FFFFFF;
+    --border:#F2DDD0; --divider:#F6E7DC;
+    --shadow:0 8px 24px rgba(164,70,60,.07); --shadow-hover:0 12px 28px rgba(164,70,60,.12);
+    --radius:16px; --radius-sm:10px;
+    --sans:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --serif:Georgia,"Times New Roman",serif;
+    --display:"Cormorant Garamond",Georgia,serif;
+    --ui:"Jost","Segoe UI",Arial,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:var(--background);color:var(--cocoa);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;cursor:pointer}
+
+  /* ===== Demo page only ===== */
+  .demo{max-width:760px;margin:0 auto;padding:56px 16px 80px}
+  .demo-eyebrow{margin:0 0 6px;font-family:var(--ui);font-size:12px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:rgba(74,42,35,.8)}
+  .demo h1{margin:0 0 6px;font-family:var(--display);font-size:42px;font-weight:400;color:var(--accent-deep);line-height:1.1}
+  .demo-lead{margin:0 0 32px;color:var(--muted);font-size:14px}
+  .demo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+  .demo-card{position:relative;background:linear-gradient(135deg,var(--card) 0%,#FFF7F1 100%);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+  .demo-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient);opacity:.85;border-radius:var(--radius) var(--radius) 0 0}
+  .demo-out{margin-top:28px;font-size:13px;color:var(--muted)}
+  .demo-out b{color:var(--accent-deep)}
+
+  /* ===== Dropdown component (dd-) ===== */
+  .dd-label{display:block;margin-bottom:8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cocoa)}
+  .dd{position:relative;width:100%;max-width:320px}
+  .dd svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+  .dd-trigger{display:flex;align-items:center;gap:12px;width:100%;height:62px;padding:0 12px 0 8px;
+    border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--cocoa);
+    text-align:left;transition:border-color .2s,box-shadow .2s}
+  .dd-trigger:hover{border-color:var(--accent)}
+  .dd-trigger:focus-visible,.dd.open .dd-trigger{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(223,102,86,.18)}
+  .dd-tile{width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;flex:none}
+  .dd-tile.sm{width:36px;height:36px;border-radius:9px}
+  .dd-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .dd-title{font-family:var(--ui);font-size:15px;font-weight:600;color:var(--cocoa)}
+  .dd-sub{font-size:12px;color:var(--muted)}
+  .dd .dd-chev{margin-left:auto;width:16px;height:16px;color:var(--accent-deep)}
+
+  /* tile colours */
+  .t-date{background:var(--gradient);color:var(--cocoa)}
+  .t-empty{background:var(--surface-soft);color:var(--muted)}
+  .t-groom{background:#FBE2D5;color:var(--accent-deep)}
+  .t-bride{background:#FFF0D9;color:#8A5A32}
+  .t-both{background:var(--surface-soft);color:var(--accent)}
+
+  .dd-panel{position:absolute;left:0;top:calc(100% + 8px);z-index:20;width:100%;min-width:290px;
+    background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-hover);padding:6px;
+    opacity:0;transform:translateY(-4px) scale(.985);transform-origin:top left;pointer-events:none;
+    transition:opacity .16s ease,transform .16s ease}
+  .dd.open .dd-panel{opacity:1;transform:none;pointer-events:auto}
+  .dd-section{margin:8px 12px 6px;font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .dd-divider{height:1px;background:var(--divider);margin:4px 6px}
+
+  .dd-opt{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:0 10px;border:0;border-radius:var(--radius-sm);
+    background:transparent;text-align:left;transition:background .15s}
+  .dd-opt:hover,.dd-opt:focus-visible{background:var(--background);outline:none}
+  .dd-opt[aria-selected="true"]{background:var(--surface-soft)}
+  .dd-opt .dd-title{font-size:14px}
+  .dd .dd-check{margin-left:auto;color:var(--accent-deep);visibility:hidden}
+  .dd-opt[aria-selected="true"] .dd-check{visibility:visible}
+
+  /* calendar */
+  .dd-cal{padding:6px 6px 8px}
+  .dd-cal-head{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 10px}
+  .dd-month{font-family:var(--display);font-size:21px;font-weight:600;color:var(--accent-deep)}
+  .dd-nav{width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:var(--background);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s}
+  .dd-nav:hover,.dd-nav:focus-visible{background:var(--surface-soft);border-color:var(--accent);outline:none}
+  .dd-dow,.dd-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center}
+  .dd-dow span{font-family:var(--ui);font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--muted);padding:4px 0}
+  .dd-day{position:relative;height:38px;border:0;border-radius:8px;background:transparent;color:var(--cocoa);font-size:13px;font-weight:600}
+  .dd-day:hover,.dd-day:focus-visible{background:var(--surface-soft);outline:none}
+  .dd-day.out{color:var(--muted);opacity:.5}
+  .dd-day.today::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--accent);transform:translateX(-50%)}
+  .dd-day.sel{background:var(--accent-deep);color:#fff;box-shadow:0 4px 12px rgba(168,70,60,.28)}
+  .dd-day.sel::after{background:#fff}
+  .dd-day:disabled{cursor:not-allowed;opacity:.3;background:transparent}
+  .dd-quick{display:flex;gap:6px;flex-wrap:wrap;padding:8px 6px 4px}
+  .dd-chip{height:32px;padding:0 14px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--accent-deep);font-size:12px;font-weight:600;transition:background .2s,border-color .2s}
+  .dd-chip:hover,.dd-chip:focus-visible{background:var(--surface-soft);border-color:var(--accent);outline:none}
+
+  @media (prefers-reduced-motion:reduce){.dd-panel,.dd-trigger{transition:none}}
+</style>
+</head>
+<body>
+<main class="demo">
+  <p class="demo-eyebrow">Guest details</p>
+  <h1>Add a guest</h1>
+  <p class="demo-lead">Dropdowns in the workspace-switcher style, using your project's colours.</p>
+
+  <div class="demo-grid">
+    <!-- DATE PICKER -->
+    <div class="demo-card">
+      <span class="dd-label" id="date-label">Event date</span>
+      <div class="dd" id="dateDD">
+        <button class="dd-trigger" type="button" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="date-label dateTitle">
+          <span class="dd-tile t-date">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </span>
+          <span class="dd-text"><span class="dd-title" id="dateTitle">Select a date</span><span class="dd-sub" id="dateSub">Tap to open calendar</span></span>
+          <svg class="dd-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>
+        </button>
+        <div class="dd-panel" role="dialog" aria-label="Choose date">
+          <div class="dd-cal">
+            <div class="dd-cal-head">
+              <button class="dd-nav" type="button" data-nav="-1" aria-label="Previous month"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+              <span class="dd-month" id="calMonth" aria-live="polite"></span>
+              <button class="dd-nav" type="button" data-nav="1" aria-label="Next month"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+            </div>
+            <div class="dd-dow" aria-hidden="true"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+            <div class="dd-days" id="calDays"></div>
+          </div>
+          <div class="dd-divider"></div>
+          <div class="dd-quick">
+            <button class="dd-chip" type="button" data-quick="0">Today</button>
+            <button class="dd-chip" type="button" data-quick="7">In 1 week</button>
+            <button class="dd-chip" type="button" data-quick="30">In 1 month</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROOM / BRIDE SIDE -->
+    <div class="demo-card">
+      <span class="dd-label" id="side-label">Guest of</span>
+      <div class="dd" id="sideDD">
+        <button class="dd-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="side-label sideTitle">
+          <span class="dd-tile t-empty" id="sideTile">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.8.8 3 2.5 3 5.2"/></svg>
+          </span>
+          <span class="dd-text"><span class="dd-title" id="sideTitle">Select side</span><span class="dd-sub" id="sideSub">Groom side or bride side</span></span>
+          <svg class="dd-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>
+        </button>
+        <div class="dd-panel" role="listbox" aria-label="Guest of">
+          <p class="dd-section">Choose side</p>
+          <button class="dd-opt" type="button" role="option" aria-selected="false" data-side="groom">
+            <span class="dd-tile sm t-groom">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/><path d="M10 14l2 3 2-3"/></svg>
+            </span>
+            <span class="dd-text"><span class="dd-title">Groom side</span><span class="dd-sub">Family &amp; friends of the groom</span></span>
+            <svg class="dd-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+          </button>
+          <button class="dd-opt" type="button" role="option" aria-selected="false" data-side="bride">
+            <span class="dd-tile sm t-bride">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="6.5" r="3"/><circle cx="17.5" cy="12" r="3"/><circle cx="12" cy="17.5" r="3"/><circle cx="6.5" cy="12" r="3"/></svg>
+            </span>
+            <span class="dd-text"><span class="dd-title">Bride side</span><span class="dd-sub">Family &amp; friends of the bride</span></span>
+            <svg class="dd-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+          </button>
+          <div class="dd-divider"></div>
+          <button class="dd-opt" type="button" role="option" aria-selected="false" data-side="both">
+            <span class="dd-tile sm t-both">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            </span>
+            <span class="dd-text"><span class="dd-title">Both sides</span><span class="dd-sub">Common friends of the couple</span></span>
+            <svg class="dd-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="demo-out">Selected: <b id="outDate">no date</b> · <b id="outSide">no side</b></p>
+</main>
+
+<script>
+(function(){
+  /* ---------- open / close ---------- */
+  const dds = [...document.querySelectorAll('.dd')];
+  function setOpen(dd, open){
+    dd.classList.toggle('open', open);
+    dd.querySelector('.dd-trigger').setAttribute('aria-expanded', open);
+    if(open){
+      dds.forEach(o => { if(o !== dd) setOpen(o, false); });
+      const first = dd.querySelector('.dd-opt[aria-selected="true"], .dd-day.sel, .dd-opt, .dd-day:not(:disabled)');
+      if(first) setTimeout(() => first.focus(), 30);
+    }
+  }
+  dds.forEach(dd => {
+    dd.querySelector('.dd-trigger').addEventListener('click', () => setOpen(dd, !dd.classList.contains('open')));
+    dd.addEventListener('keydown', e => {
+      if(e.key === 'Escape' && dd.classList.contains('open')){ setOpen(dd, false); dd.querySelector('.dd-trigger').focus(); }
+    });
+  });
+  document.addEventListener('click', e => dds.forEach(dd => { if(!dd.contains(e.target)) setOpen(dd, false); }));
+
+  /* ---------- side dropdown ---------- */
+  const sideDD = document.getElementById('sideDD');
+  const sides = {
+    groom:{title:'Groom side', sub:'Family & friends of the groom', cls:'t-groom'},
+    bride:{title:'Bride side', sub:'Family & friends of the bride', cls:'t-bride'},
+    both:{title:'Both sides', sub:'Common friends of the couple', cls:'t-both'}
+  };
+  const opts = [...sideDD.querySelectorAll('.dd-opt')];
+  opts.forEach((opt, i) => {
+    opt.addEventListener('click', () => {
+      const s = sides[opt.dataset.side];
+      opts.forEach(o => o.setAttribute('aria-selected', o === opt));
+      const tile = document.getElementById('sideTile');
+      tile.className = 'dd-tile ' + s.cls;
+      tile.innerHTML = opt.querySelector('.dd-tile').innerHTML;
+      document.getElementById('sideTitle').textContent = s.title;
+      document.getElementById('sideSub').textContent = s.sub;
+      document.getElementById('outSide').textContent = s.title;
+      setOpen(sideDD, false); sideDD.querySelector('.dd-trigger').focus();
+    });
+    opt.addEventListener('keydown', e => {
+      if(e.key === 'ArrowDown'){ e.preventDefault(); opts[(i+1)%opts.length].focus(); }
+      if(e.key === 'ArrowUp'){ e.preventDefault(); opts[(i-1+opts.length)%opts.length].focus(); }
+    });
+  });
+
+  /* ---------- date picker ---------- */
+  const dateDD = document.getElementById('dateDD');
+  const daysEl = document.getElementById('calDays');
+  const monthEl = document.getElementById('calMonth');
+  const today = new Date(); today.setHours(0,0,0,0);
+  let view = new Date(today.getFullYear(), today.getMonth(), 1);
+  let selected = null;
+  const sameDay = (a,b) => a && b && a.getTime() === b.getTime();
+  const fmtLong = d => d.toLocaleDateString('en-IN',{weekday:'short', day:'numeric', month:'short', year:'numeric'});
+
+  function render(){
+    monthEl.textContent = view.toLocaleDateString('en-IN',{month:'long', year:'numeric'});
+    daysEl.innerHTML = '';
+    const start = new Date(view); start.setDate(1 - view.getDay());
+    for(let i = 0; i < 42; i++){
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'dd-day'; b.textContent = d.getDate();
+      b.setAttribute('aria-label', fmtLong(d));
+      if(d.getMonth() !== view.getMonth()) b.classList.add('out');
+      if(sameDay(d, today)) b.classList.add('today');
+      if(sameDay(d, selected)){ b.classList.add('sel'); b.setAttribute('aria-pressed','true'); }
+      if(d < today) b.disabled = true;   // remove this line to allow past dates
+      b.addEventListener('click', () => pick(d));
+      daysEl.appendChild(b);
+    }
+  }
+  function pick(d){
+    selected = new Date(d);
+    view = new Date(d.getFullYear(), d.getMonth(), 1);
+    const diff = Math.round((selected - today) / 86400000);
+    document.getElementById('dateTitle').textContent = fmtLong(selected);
+    document.getElementById('dateSub').textContent = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : `In ${diff} days`;
+    document.getElementById('outDate').textContent = fmtLong(selected);
+    render(); setOpen(dateDD, false); dateDD.querySelector('.dd-trigger').focus();
+  }
+  dateDD.querySelectorAll('[data-nav]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    view = new Date(view.getFullYear(), view.getMonth() + Number(b.dataset.nav), 1);
+    render();
+  }));
+  dateDD.querySelectorAll('[data-quick]').forEach(b => b.addEventListener('click', () => {
+    const d = new Date(today); d.setDate(d.getDate() + Number(b.dataset.quick)); pick(d);
+  }));
+  render();
+})();
+</script>
+</body>
+</html>

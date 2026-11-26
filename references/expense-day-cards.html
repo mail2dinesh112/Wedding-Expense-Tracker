@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expense Day Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ===== Project tokens (from your style.css) — skip if style.css is loaded ===== */
+  :root{
+    --amber:#FFC46B; --peach:#FA9062; --coral:#F4635E;
+    --accent-deep:#A8463C; --accent:#DF6656; --cocoa:#4A2A23; --muted:#8C6D61;
+    --gradient:linear-gradient(90deg,var(--amber) 0%,var(--peach) 50%,var(--coral) 100%);
+    --background:#FFF8F2; --surface-soft:#FFF1E6; --card:#FFFFFF;
+    --border:#F2DDD0; --divider:#F6E7DC;
+    --shadow:0 8px 24px rgba(164,70,60,.07); --shadow-hover:0 12px 28px rgba(164,70,60,.12);
+    --radius:16px; --radius-sm:10px;
+    --sans:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --serif:Georgia,"Times New Roman",serif;
+    --display:"Cormorant Garamond",Georgia,serif;
+    --ui:"Jost","Segoe UI",Arial,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--background);color:var(--cocoa);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;cursor:pointer}
+  button:focus-visible{outline:2px solid var(--accent-deep);outline-offset:2px}
+
+  .page{max-width:1160px;margin:0 auto;padding:40px 24px 64px}
+
+  /* ===== Expense day cards (xd-) ===== */
+  .xd{
+    --row-h:46px;          /* height of one expense row */
+    --head-h:34px;         /* height of the column header */
+    --visible-rows:6;      /* rows shown before scrolling */
+  }
+  .xd svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .xd .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* toolbar */
+  .xd-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+  .xd-meta{margin:0;font-size:13px;color:var(--muted)}
+  .xd-meta b{color:var(--cocoa)}
+  .xd-legend{display:flex;gap:16px;font-size:12.5px;color:var(--muted)}
+  .xd-legend span{display:inline-flex;align-items:center;gap:8px}
+  .xd-legend .xd-sideic{width:26px;height:26px}
+  .xd-legend .xd-sideic svg{width:13px;height:13px}
+  .xd-tools{display:flex;gap:8px}
+  .xd-tool{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--card);color:var(--accent-deep);font-size:13px;font-weight:600;transition:background .2s,border-color .2s}
+  .xd-tool:hover{background:var(--surface-soft);border-color:var(--accent)}
+  .xd-tool svg{width:16px;height:16px}
+
+  /* day card */
+  .xd-list{display:flex;flex-direction:column;gap:16px}
+  .xd-day{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .2s,border-color .2s}
+  .xd-day:hover{box-shadow:var(--shadow-hover)}
+  .xd-day.open{border-color:#EFC5AE}
+
+  .xd-head{display:flex;align-items:center;gap:16px;width:100%;padding:16px 20px;border:0;background:linear-gradient(135deg,var(--card) 0%,#FFF4EC 100%);text-align:left}
+  .xd-day.open .xd-head{background:linear-gradient(135deg,#FFF1E6 0%,#FDE9DC 100%);border-bottom:1px solid var(--border)}
+  .xd-date{width:56px;height:56px;border-radius:12px;background:var(--gradient);color:var(--cocoa);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;line-height:1}
+  .xd-date b{font-family:var(--display);font-size:26px;font-weight:600}
+  .xd-date small{font-family:var(--ui);font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+  .xd-htext{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .xd-htitle{font-family:var(--display);font-size:22px;font-weight:600;color:var(--accent-deep);line-height:1.1}
+  .xd-hsub{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+  .xd-icons{display:flex}
+  .xd-icons span{width:24px;height:24px;border-radius:50%;background:var(--surface-soft);border:2px solid var(--card);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;margin-left:-6px}
+  .xd-icons span:first-child{margin-left:0}
+  .xd-icons svg{width:12px;height:12px}
+  .xd-hright{margin-left:auto;display:flex;align-items:center;gap:20px}
+  .xd-splitwrap{display:flex;flex-direction:column;gap:6px;width:170px}
+  .xd-split{display:flex;height:6px;border-radius:999px;overflow:hidden;background:var(--divider)}
+  .xd-split .g{background:var(--accent-deep)} .xd-split .b{background:var(--amber)}
+  .xd-splitlbl{display:flex;justify-content:space-between;font-size:11px;font-weight:600}
+  .xd-splitlbl .g{color:var(--accent-deep)} .xd-splitlbl .b{color:#8A5A32}
+  .xd-total{text-align:right}
+  .xd-total small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .xd-total b{font-family:var(--serif);font-size:22px;color:var(--accent-deep);white-space:nowrap}
+  .xd-chev{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;flex:none;transition:transform .25s ease,background .2s}
+  .xd-day.open .xd-chev{transform:rotate(180deg);background:var(--surface-soft)}
+
+  /* smooth collapse */
+  .xd-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s ease}
+  .xd-day.open .xd-body{grid-template-rows:1fr}
+  .xd-inner{overflow:hidden;min-height:0}
+
+  /* ===== grid inside card: fixed 6 rows + scroll ===== */
+  .xd-scrollwrap{position:relative}
+  .xd-scroll{max-height:calc(var(--head-h) + var(--row-h) * var(--visible-rows));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#E8C2AE transparent}
+  .xd-scroll::-webkit-scrollbar{width:8px}
+  .xd-scroll::-webkit-scrollbar-thumb{background:#E8C2AE;border-radius:999px;border:2px solid var(--card)}
+  .xd-scroll::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+  .xd-scroll:focus-visible{outline:2px solid var(--accent-deep);outline-offset:-2px}
+
+  .xd-grid{width:100%;border-collapse:collapse;text-align:left}
+  .xd-grid th{position:sticky;top:0;z-index:1;height:var(--head-h);padding:0 16px;background:var(--surface-soft);border-bottom:1px solid var(--border);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cocoa);white-space:nowrap}
+  .xd-grid td{height:var(--row-h);padding:0 16px;border-bottom:1px solid var(--divider);vertical-align:middle;font-size:13.5px}
+  .xd-grid tbody tr:last-child td{border-bottom:0}
+  .xd-grid tbody tr{transition:background .15s}
+  .xd-grid tbody tr:hover td{background:var(--background)}
+  .xd-grid tbody tr:nth-child(even) td{background:#FFFCF9}
+  .xd-grid tbody tr:nth-child(even):hover td{background:var(--background)}
+  .xd-grid .c-num{width:44px;color:var(--muted);font-family:var(--ui);font-size:11.5px}
+  .xd-grid .c-side{width:64px;text-align:center}
+  .xd-grid .c-amt{width:120px;text-align:right}
+  .xd-grid .c-act{width:84px;text-align:right}
+
+  .xd-who{display:flex;align-items:center;gap:10px;min-width:0}
+  .xd-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:none;background:var(--surface-soft);color:var(--accent-deep)}
+  .xd-ico svg{width:14px;height:14px}
+  .xd-name{font-weight:600;color:var(--cocoa);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .xd-sub{font-size:11.5px;color:var(--muted);margin-left:6px;white-space:nowrap}
+
+  /* side = icon only */
+  .xd-sideic{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;vertical-align:middle}
+  .xd-sideic svg{width:13px;height:13px}
+  .xd-sideic.groom{background:#FBE2D5;color:var(--accent-deep)}
+  .xd-sideic.bride{background:#FFF0D9;color:#8A5A32;box-shadow:inset 0 0 0 1px #F5D9B0}
+
+  .xd-amt{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--accent-deep);white-space:nowrap}
+  .xd-acts{display:inline-flex;gap:6px;opacity:0;transition:opacity .15s}
+  .xd-grid tr:hover .xd-acts,.xd-grid tr:focus-within .xd-acts{opacity:1}
+  .xd-ibtn{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--accent-deep);transition:background .2s,border-color .2s}
+  .xd-ibtn svg{width:14px;height:14px}
+  .xd-ibtn:hover{background:var(--surface-soft);border-color:var(--accent)}
+  .xd-ibtn.danger:hover{background:#FBE2D5}
+  @media (hover:none){.xd-acts{opacity:1}}
+
+  /* bottom fade + "scroll for more" hint */
+  .xd-fade{position:absolute;left:0;right:8px;bottom:0;height:44px;background:linear-gradient(to bottom,rgba(255,255,255,0),var(--card));pointer-events:none;opacity:0;transition:opacity .2s}
+  .xd-scrollwrap.more .xd-fade{opacity:1}
+  .xd-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 16px;border-top:1px solid var(--border);background:var(--surface-soft);font-size:12px;color:var(--muted)}
+  .xd-foot b{color:var(--cocoa)}
+  .xd-more{display:inline-flex;align-items:center;gap:6px;flex:none;white-space:nowrap;height:30px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--accent-deep);font-size:12px;font-weight:600}
+  .xd-more:hover{border-color:var(--accent)}
+  .xd-more svg{width:14px;height:14px;transition:transform .2s}
+  .xd-more.up svg{transform:rotate(180deg)}
+
+  .xd-empty{text-align:center;padding:48px 24px;background:var(--card);border:1px dashed var(--border);border-radius:var(--radius);color:var(--muted)}
+
+  .xd-toast{position:fixed;left:50%;bottom:28px;z-index:80;display:flex;align-items:center;gap:14px;transform:translate(-50%,16px);opacity:0;pointer-events:none;background:var(--cocoa);color:var(--surface-soft);padding:10px 12px 10px 20px;border-radius:999px;font-size:13px;box-shadow:0 10px 26px rgba(74,42,35,.26);transition:opacity .2s,transform .2s}
+  .xd-toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  .xd-toast button{border:0;background:var(--amber);color:var(--cocoa);font-weight:700;font-size:12px;padding:6px 14px;border-radius:999px}
+
+  /* responsive */
+  @media (max-width:820px){ .xd-splitwrap{display:none} .xd-grid .c-num{display:none} }
+  @media (max-width:640px){
+    .xd{--row-h:50px}
+    .xd-sub{display:none}
+    .page{padding:24px 14px 48px}
+    .xd-head{padding:14px;gap:12px}
+    .xd-date{width:48px;height:48px}
+    .xd-date b{font-size:22px}
+    .xd-htitle{font-size:19px}
+    .xd-icons{display:none}
+    .xd-total b{font-size:18px}
+    .xd-legend{width:100%;order:3}
+    .xd-grid th,.xd-grid td{padding:0 10px}
+    .xd-grid .c-side{width:44px}
+    .xd-grid .c-amt{width:auto}
+    .xd-grid .c-act{width:70px}
+    .xd-ico{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){.xd *{transition:none!important}.xd-scroll{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<main class="page">
+  <section class="xd" aria-label="Expenses by day">
+    <div class="xd-bar">
+      <p class="xd-meta" id="xdMeta"></p>
+      <div class="xd-legend" id="xdLegend"></div>
+      <div class="xd-tools">
+        <button class="xd-tool" type="button" id="xdExpand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>Expand all</button>
+        <button class="xd-tool" type="button" id="xdCollapse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20l5-5 5 5M7 4l5 5 5-5"/></svg>Collapse all</button>
+      </div>
+    </div>
+    <div class="xd-list" id="xdList"></div>
+  </section>
+</main>
+<div class="xd-toast" id="xdToast" role="status"><span id="xdToastMsg"></span><button type="button" id="xdUndo">Undo</button></div>
+
+<script>
+(function(){
+  /* ---------- sample data: replace with your expenses array ---------- */
+  let DATA = [
+    {id:1,  date:'2026-11-14', time:'08:15 AM', name:'Tea', side:'groom', amt:150},
+    {id:2,  date:'2026-11-14', time:'10:00 AM', name:'Water bottles', side:'groom', amt:240},
+    {id:3,  date:'2026-11-14', time:'01:30 PM', name:'Lunch', side:'groom', amt:1300},
+    {id:4,  date:'2026-11-14', time:'02:10 PM', name:'Food advance', side:'groom', amt:3000},
+    {id:5,  date:'2026-11-14', time:'03:00 PM', name:'Mehendi cones', side:'bride', amt:350},
+    {id:6,  date:'2026-11-14', time:'04:00 PM', name:'Decoration advance', side:'groom', amt:2000},
+    {id:7,  date:'2026-11-14', time:'05:30 PM', name:'Auto fare', side:'bride', amt:180},
+    {id:8,  date:'2026-11-14', time:'07:45 PM', name:'Tiffin', side:'groom', amt:500},
+    {id:9,  date:'2026-11-14', time:'09:00 PM', name:'Petrol', side:'groom', amt:1500},
+    {id:10, date:'2026-11-06', time:'09:20 AM', name:'Toll gate', side:'groom', amt:275},
+    {id:11, date:'2026-11-06', time:'11:00 AM', name:'Tea & snacks', side:'groom', amt:160},
+    {id:12, date:'2026-11-06', time:'03:30 PM', name:'Flowers', side:'bride', amt:1200},
+    {id:13, date:'2026-11-06', time:'05:15 PM', name:'Photographer advance', side:'bride', amt:2280},
+  ];
+
+  /* ---------- icons ---------- */
+  const I = {
+    cup:'<path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M6 2v2M10 2v2M14 2v2"/>',
+    plate:'<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3.5"/>',
+    fuel:'<path d="M3 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17M2 22h14M7 8h4"/><path d="M15 12h2a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"/>',
+    road:'<path d="M5 21L9 3M19 21L15 3M12 4v2M12 10v3M12 17v3"/>',
+    flower:'<circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="6.5" r="3"/><circle cx="17.5" cy="12" r="3"/><circle cx="12" cy="17.5" r="3"/><circle cx="6.5" cy="12" r="3"/>',
+    camera:'<path d="M3 8a2 2 0 0 1 2-2h2l2-3h6l2 3h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/>',
+    hand:'<path d="M18 11V6a2 2 0 0 0-4 0M14 10V4a2 2 0 0 0-4 0v2M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>',
+    receipt:'<path d="M5 3v18l2-1.5L9 21l2-1.5L13 21l2-1.5L17 21l2-1.5V3l-2 1.5L15 3l-2 1.5L11 3 9 4.5 7 3z"/><path d="M9 9h6M9 13h6"/>',
+    edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
+    chev:'<path d="M6 9l6 6 6-6"/>',
+    groom:'<circle cx="12" cy="7" r="4"/><path d="M5 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/><path d="M10 14l2 3 2-3"/>',
+    bride:'<circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="6.5" r="3"/><circle cx="17.5" cy="12" r="3"/><circle cx="12" cy="17.5" r="3"/><circle cx="6.5" cy="12" r="3"/>',
+  };
+  const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${I[k]}</svg>`;
+  const CATS = [
+    [/tea|coffee|snack|water|juice/, 'cup', 'Refreshments'],
+    [/lunch|dinner|tiffin|food|breakfast|meal/, 'plate', 'Food'],
+    [/petrol|diesel|fuel/, 'fuel', 'Fuel'],
+    [/toll|travel|cab|auto|bus|train|fare/, 'road', 'Travel'],
+    [/flower|decor|garland/, 'flower', 'Decoration'],
+    [/photo|video|camera/, 'camera', 'Photography'],
+    [/mehendi|makeup|beauty/, 'hand', 'Beauty'],
+  ];
+  const cat = n => (CATS.find(c => c[0].test(n.toLowerCase())) || [0,'receipt','General']);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const rupee = v => '₹' + v.toLocaleString('en-IN');
+  const sideLabel = s => s === 'groom' ? 'Groom side' : 'Bride side';
+  const sideIcon = s => `<span class="xd-sideic ${s}" title="${sideLabel(s)}">${svg(s)}<span class="sr">${sideLabel(s)}</span></span>`;
+
+  document.getElementById('xdLegend').innerHTML =
+    `<span>${sideIcon('groom')}Groom side</span><span>${sideIcon('bride')}Bride side</span>`;
+
+  /* ---------- state ---------- */
+  const openSet = new Set();
+  let firstRender = true;
+  const list = document.getElementById('xdList');
+  const VISIBLE = 6;
+
+  function groups(){
+    const m = new Map();
+    DATA.forEach(e => { if(!m.has(e.date)) m.set(e.date, []); m.get(e.date).push(e); });
+    return [...m.entries()].sort((a,b) => b[0].localeCompare(a[0])).map(([date, items]) => {
+      const g = items.filter(i => i.side === 'groom').reduce((s,i) => s + i.amt, 0);
+      const b = items.filter(i => i.side === 'bride').reduce((s,i) => s + i.amt, 0);
+      return {date, items, g, b, total: g + b};
+    });
+  }
+
+  function render(){
+    const gs = groups();
+    if(firstRender && gs.length){ openSet.add(gs[0].date); firstRender = false; } // newest day open by default
+    const total = DATA.reduce((s,e) => s + e.amt, 0);
+    document.getElementById('xdMeta').innerHTML = `Showing <b>${DATA.length}</b> expenses across <b>${gs.length}</b> days · <b>${rupee(total)}</b>`;
+
+    if(!gs.length){ list.innerHTML = '<div class="xd-empty">No expenses yet. Add your first one!</div>'; return; }
+
+    list.innerHTML = gs.map(d => {
+      const dt = new Date(d.date);
+      const open = openSet.has(d.date);
+      const uniqIcons = [...new Set(d.items.map(e => cat(e.name)[1]))].slice(0,4);
+      const gp = d.total ? d.g / d.total * 100 : 0;
+      const scrolls = d.items.length > VISIBLE;
+      return `
+      <article class="xd-day${open ? ' open' : ''}" data-date="${d.date}">
+        <button class="xd-head" type="button" aria-expanded="${open}" aria-controls="xd-${d.date}">
+          <span class="xd-date"><b>${dt.getDate()}</b><small>${dt.toLocaleDateString('en-IN',{month:'short'})}</small></span>
+          <span class="xd-htext">
+            <span class="xd-htitle">${dt.toLocaleDateString('en-IN',{weekday:'long', day:'numeric', month:'long', year:'numeric'})}</span>
+            <span class="xd-hsub">
+              <span class="xd-icons">${uniqIcons.map(k => `<span>${svg(k)}</span>`).join('')}</span>
+              ${d.items.length} expense${d.items.length > 1 ? 's' : ''}
+            </span>
+          </span>
+          <span class="xd-hright">
+            <span class="xd-splitwrap" aria-label="Groom ${rupee(d.g)}, Bride ${rupee(d.b)}">
+              <span class="xd-split"><span class="g" style="width:${gp}%"></span><span class="b" style="width:${100-gp}%"></span></span>
+              <span class="xd-splitlbl"><span class="g">G ${rupee(d.g)}</span><span class="b">B ${rupee(d.b)}</span></span>
+            </span>
+            <span class="xd-total"><small>Day total</small><b>${rupee(d.total)}</b></span>
+            <span class="xd-chev">${svg('chev')}</span>
+          </span>
+        </button>
+        <div class="xd-body" id="xd-${d.date}" ${open ? '' : 'inert'}>
+          <div class="xd-inner">
+            <div class="xd-scrollwrap${scrolls ? ' more' : ''}">
+              <div class="xd-scroll" ${scrolls ? 'tabindex="0" role="region" aria-label="Expenses on ' + dt.toLocaleDateString('en-IN',{day:'numeric',month:'long'}) + ', scrollable"' : ''}>
+                <table class="xd-grid">
+                  <thead><tr>
+                    <th class="c-num">#</th><th>Expense</th>
+                    <th class="c-side">Side</th><th class="c-amt">Amount</th><th class="c-act"><span class="sr">Actions</span></th>
+                  </tr></thead>
+                  <tbody>
+                  ${d.items.map((e, i) => { const c = cat(e.name); return `
+                    <tr>
+                      <td class="c-num">${String(i+1).padStart(2,'0')}</td>
+                      <td><span class="xd-who"><span class="xd-ico">${svg(c[1])}</span>
+                        <span style="min-width:0;display:flex;align-items:baseline;overflow:hidden"><span class="xd-name">${esc(e.name)}</span><span class="xd-sub">${c[2]}</span></span></span></td>
+                      <td class="c-side">${sideIcon(e.side)}</td>
+                      <td class="c-amt"><span class="xd-amt">${rupee(e.amt)}</span></td>
+                      <td class="c-act"><span class="xd-acts">
+                        <button class="xd-ibtn" type="button" data-edit="${e.id}" aria-label="Edit ${esc(e.name)}">${svg('edit')}</button>
+                        <button class="xd-ibtn danger" type="button" data-del="${e.id}" aria-label="Delete ${esc(e.name)}">${svg('trash')}</button>
+                      </span></td>
+                    </tr>`; }).join('')}
+                  </tbody>
+                </table>
+              </div>
+              <div class="xd-fade"></div>
+            </div>
+            ${scrolls ? `<div class="xd-foot"><span>Showing <b>${VISIBLE}</b> of <b>${d.items.length}</b>, scroll to see more</span>
+              <button class="xd-more" type="button" data-more>Scroll down ${svg('chev')}</button></div>` : ''}
+          </div>
+        </div>
+      </article>`;
+    }).join('');
+
+    // scroll hint: hide fade at bottom, flip the button
+    list.querySelectorAll('.xd-scroll').forEach(sc => {
+      sc.addEventListener('scroll', () => {
+        const atEnd = sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4;
+        sc.parentElement.classList.toggle('more', !atEnd && sc.scrollHeight > sc.clientHeight);
+        const btn = sc.closest('.xd-inner').querySelector('[data-more]');
+        if(btn){ btn.classList.toggle('up', atEnd); btn.firstChild.textContent = atEnd ? 'Back to top ' : 'Scroll down '; }
+      }, {passive:true});
+    });
+  }
+
+  function setOpen(card, open){
+    const date = card.dataset.date;
+    open ? openSet.add(date) : openSet.delete(date);
+    card.classList.toggle('open', open);
+    card.querySelector('.xd-head').setAttribute('aria-expanded', open);
+    const body = card.querySelector('.xd-body');
+    open ? body.removeAttribute('inert') : body.setAttribute('inert', '');
+  }
+
+  /* ---------- events ---------- */
+  let lastDeleted = null, toastTimer;
+  const toast = document.getElementById('xdToast');
+  list.addEventListener('click', e => {
+    const head = e.target.closest('.xd-head');
+    if(head){ const card = head.closest('.xd-day'); setOpen(card, !card.classList.contains('open')); return; }
+
+    const more = e.target.closest('[data-more]');
+    if(more){
+      const sc = more.closest('.xd-inner').querySelector('.xd-scroll');
+      const atEnd = sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4;
+      sc.scrollTo({top: atEnd ? 0 : sc.scrollTop + sc.clientHeight - 42, behavior:'smooth'});
+      return;
+    }
+
+    const del = e.target.closest('[data-del]');
+    if(del){
+      const idx = DATA.findIndex(x => x.id == del.dataset.del);
+      lastDeleted = {item: DATA[idx], idx};
+      DATA.splice(idx, 1);
+      render();
+      document.getElementById('xdToastMsg').textContent = `"${lastDeleted.item.name}" deleted`;
+      toast.classList.add('show'); clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.classList.remove('show'); lastDeleted = null; }, 4000);
+      return;
+    }
+    const edit = e.target.closest('[data-edit]');
+    if(edit){
+      // hook: open your existing edit modal here, e.g. openExpenseModal(Number(edit.dataset.edit))
+      alert('Open edit modal for expense #' + edit.dataset.edit);
+    }
+  });
+  document.getElementById('xdUndo').addEventListener('click', () => {
+    if(!lastDeleted) return;
+    DATA.splice(lastDeleted.idx, 0, lastDeleted.item);
+    lastDeleted = null; toast.classList.remove('show'); render();
+  });
+  document.getElementById('xdExpand').addEventListener('click', () => list.querySelectorAll('.xd-day').forEach(c => setOpen(c, true)));
+  document.getElementById('xdCollapse').addEventListener('click', () => list.querySelectorAll('.xd-day').forEach(c => setOpen(c, false)));
+
+  render();
+})();
+</script>
+</body>
+</html>
