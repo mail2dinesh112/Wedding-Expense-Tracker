@@ -21,7 +21,7 @@ export default function Header({ wedding, onLogout }) {
           src={`${base}assets/images/couple.webp`}
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-14 right-[-126px] z-0 w-[clamp(240px,25vw,330px)] drop-shadow-[0_14px_22px_rgba(74,42,35,0.18)] max-sm:right-1/2 max-sm:bottom-[-30px] max-sm:w-[210px] max-sm:translate-x-1/2"
+          className="pointer-events-none absolute -bottom-[100px] right-[-126px] z-0 w-[clamp(240px,25vw,330px)] drop-shadow-[0_14px_22px_rgba(74,42,35,0.18)] max-sm:right-1/2 max-sm:bottom-[-80px] max-sm:w-[210px] max-sm:translate-x-1/2"
         />
 
         <div className="relative z-[1] mx-auto mt-2 max-w-[660px] -translate-x-25 text-center max-sm:translate-x-0 max-sm:mx-0 max-sm:pb-[190px]">

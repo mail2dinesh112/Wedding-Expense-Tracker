@@ -5,6 +5,7 @@ import ExpenseToolbar from '../components/ExpenseToolbar';
 import ExpenseList from '../components/ExpenseList';
 import ExpenseModal from '../components/ExpenseModal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import LoadingScreen from '../components/LoadingScreen';
 import { useExpenses } from '../hooks/useExpenses';
 import { filterExpenses } from '../utils/expenseUtils';
 import { formatINR, formatLongDate } from '../utils/formatters';
@@ -57,7 +58,7 @@ export default function DashboardPage({ onLogout }) {
   };
 
   if (!wedding && loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-bg text-muted">Loading wedding data…</div>;
+    return <LoadingScreen />;
   }
 
   if (!wedding && error) {
@@ -72,6 +73,7 @@ export default function DashboardPage({ onLogout }) {
 
   return (
     <div className="min-h-screen bg-bg">
+      {loading && wedding && <div className="api-progress" aria-hidden="true" />}
       <Header wedding={wedding} onLogout={onLogout} />
 
       <main className="relative z-10 mx-auto -mt-8 max-w-[1160px] px-6 pb-10">

@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { Loader2, Users, X } from 'lucide-react';
 import { DateDropdown, SIDE_OPTIONS, SideDropdown } from './Dropdown';
 import { validateExpenseInput } from '../utils/validators';
 import { todayISO } from '../utils/formatters';
-import { Users } from 'lucide-react';
 
 const EMPTY = { date: todayISO(), name: '', side: '', amount: '' };
 
@@ -110,7 +109,8 @@ export default function ExpenseModal({ expense, onClose, onSave }) {
           <div className="flex justify-end gap-2 border-t border-line px-6 py-5">
             <button type="button" className="btn-ghost" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={submitting}>
-              {expense ? 'Update Expense' : 'Save Expense'}
+              {submitting && <Loader2 size={15} className="animate-spin" />}
+              {submitting ? 'Saving…' : expense ? 'Update Expense' : 'Save Expense'}
             </button>
           </div>
         </form>

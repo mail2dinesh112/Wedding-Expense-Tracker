@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Check, Pencil, X } from 'lucide-react';
+import { Check, Loader2, Pencil, X } from 'lucide-react';
 import { validateBudget } from '../utils/validators';
 
 export default function BudgetEditor({ value, onSave }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value));
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   const start = () => {
     setDraft(String(value));
@@ -16,7 +17,9 @@ export default function BudgetEditor({ value, onSave }) {
   const save = async () => {
     const message = validateBudget(draft);
     if (message) { setError(message); return; }
+    setSaving(true);
     await onSave(Number(draft));
+    setSaving(false);
     setEditing(false);
   };
 
@@ -40,7 +43,9 @@ export default function BudgetEditor({ value, onSave }) {
           onKeyDown={(event) => { if (event.key === 'Enter') save(); if (event.key === 'Escape') setEditing(false); }}
           aria-label="Total budget"
         />
-        <button type="button" className="icon-button confirm" aria-label="Save budget" onClick={save}><Check size={14} /></button>
+        <button type="button" className="icon-button confirm" aria-label="Save budget" onClick={save} disabled={saving}>
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+        </button>
         <button type="button" className="icon-button" aria-label="Cancel" onClick={() => setEditing(false)}><X size={14} /></button>
       </div>
       {error && <p className="field-error mt-1">{error}</p>}

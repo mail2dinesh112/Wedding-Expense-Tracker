@@ -260,6 +260,48 @@
 .calendar-day.selected { background: var(--color-accent-deep); color: white; }
 .calendar-day.selected::after { background: white; }
 
+@keyframes gentle-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+
+@keyframes progress-slide {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(320%); }
+}
+
+.loader-ring {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0deg, #FFC46B 90deg, #FA9062 190deg, #F4635E 280deg, transparent 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  animation: gentle-spin 1.3s linear infinite, gentle-pulse 1.8s ease-in-out infinite;
+}
+
+.api-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 95;
+  height: 3px;
+  overflow: hidden;
+  background: rgba(242, 221, 208, 0.45);
+}
+.api-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  background: var(--gradient-brand);
+  border-radius: 999px;
+  animation: progress-slide 1.3s ease-in-out infinite;
+}
+
 input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
