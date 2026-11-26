@@ -39,7 +39,7 @@ export default function ExpenseModal({ expense, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-cocoa/45 p-5 backdrop-blur-sm" onClick={onClose}>
-      <div className="card max-h-[calc(100vh-40px)] w-full max-w-[480px] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="expense-modal-title" onClick={(event) => event.stopPropagation()}>
+      <div className="card w-full max-w-[480px]" role="dialog" aria-modal="true" aria-labelledby="expense-modal-title" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 rounded-t-[20px] border-b border-line bg-gradient-to-br from-surface to-white px-6 py-5">
           <div>
             <p className="m-0 text-[10.5px] font-bold uppercase tracking-[0.14em] text-muted">Wedding Expense</p>
