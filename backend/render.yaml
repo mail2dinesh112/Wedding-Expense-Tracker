@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: wedding-expense-tracker-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: STORAGE_BACKEND
+        value: github
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_REPO_OWNER
+        value: mail2dinesh112
+      - key: GITHUB_REPO_NAME
+        sync: false
+      - key: GITHUB_FILE_PATH
+        value: wedding.json
+      - key: GITHUB_BRANCH
+        value: main
+      - key: GITHUB_MAX_RETRIES
+        value: "3"
+      - key: CORS_ORIGINS
+        value: https://mail2dinesh112.github.io

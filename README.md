@@ -27,17 +27,22 @@ python -m http.server 8000
 
 Then visit `http://localhost:8000`.
 
-## Deploying to GitHub Pages
+## Deploying
 
-1. Push this repository to GitHub.
-2. In the repository, go to **Settings → Pages**.
-3. Set **Source** to **Deploy from a branch**, choose `main` and `/ (root)`, then save.
-4. The site will be available at the repository's GitHub Pages URL.
+The original static app at the repository root can still be published from `main` / `(root)` via Settings → Pages.
+
+The full-stack migration (frontend + backend + private JSON storage) has its own guide: **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**. It covers Render, GitHub Actions Pages deployment, secrets, and the private data repository.
+
+## Migration (branch `refactor`)
+
+Phase 1 lives in `frontend/` — React + Vite + Tailwind CSS. Phase 2 lives in `backend/` — FastAPI with JWT auth and modular routers. Phase 3 adds GitHub Contents API storage with SHA conflict retries and a backup endpoint; local JSON storage remains the dev default. Phase 4 connects the React app to FastAPI with JWT login, error states and retry handling. See each folder's README for commands. The original static app remains at the repository root until migration is complete.
 
 ## Project structure
 
 ```text
 ├── index.html
+├── frontend/             # React + Vite + Tailwind migration (Phase 1)
+├── backend/              # FastAPI service (Phase 2)
 ├── assets/
 │   ├── css/style.css
 │   ├── js/
@@ -48,6 +53,8 @@ Then visit `http://localhost:8000`.
 │   ├── data/expenses.json
 │   └── images/           # optimized WebP hero assets (sources in images/source/)
 ├── references/           # original design reference files
+├── docs/DEPLOYMENT.md    # production deployment guide
+├── .github/workflows/    # Pages deploy + CI test workflows
 ├── README.md
 └── .gitignore
 ```
